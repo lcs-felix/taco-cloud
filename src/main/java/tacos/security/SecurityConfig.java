@@ -1,6 +1,5 @@
 package tacos.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -14,8 +13,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private UserRepositoryUserDetailsService userDetailsService;
+    private final UserRepositoryUserDetailsService userDetailsService;
+
+    SecurityConfig(UserRepositoryUserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -31,13 +33,22 @@ class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/design", "/orders")
+                .antMatchers("/design/**", "/orders")
                     .hasRole("USER")
                 .antMatchers("/", "/**").permitAll()
-            .and()
-                .formLogin()
-            .and()
-                .logout()
-                    .logoutSuccessUrl("/");
+                .and()
+                    .formLogin()
+                .and()
+                    .httpBasic()
+                .and()
+                    .logout()
+                    .logoutSuccessUrl("/")
+                .and()
+                    .csrf()
+                    .ignoringAntMatchers("/h2-console/**")
+                .and()
+                    .headers()
+                    .frameOptions()
+                    .sameOrigin();
     }
 }

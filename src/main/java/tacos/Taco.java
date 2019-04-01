@@ -1,6 +1,9 @@
 package tacos;
 
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.rest.core.annotation.RestResource;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -10,8 +13,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
+@NoArgsConstructor
 @Data
 @Entity
+@RestResource(rel="tacos", path="tacos")
 public class Taco {
 
     @Id @GeneratedValue
@@ -27,6 +32,11 @@ public class Taco {
     @NotNull(message = "You must choose at least 1 engredient")
     @Size(min = 1, message = "You must choose at least 1 engredient")
     private List<Ingredient> ingredients;
+
+    public Taco(String name, List<Ingredient> ingredients) {
+        this.name = name;
+        this.ingredients = ingredients;
+    }
 
     public long getCreatedInMillis() {
         return createdAt.atZone(ZoneId.systemDefault()).toEpochSecond();
